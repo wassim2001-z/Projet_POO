@@ -1,7 +1,7 @@
-import pygame
 import random
-from unit import *
+import pygame
 
+# Classe Tile
 class Tile:
     """
     Represents a tile on the game board.
@@ -15,7 +15,7 @@ class Tile:
     obstacle : bool Indicates if the tile is an obstacle.
     special : str Special attribute for unique characteristics of the tile.
     """
-  
+
     def __init__(self, x, y, color=(255, 255, 255), visibility=1, speed=1, obstacle=False, special=""):
         self.x = x
         self.y = y
@@ -25,42 +25,35 @@ class Tile:
         self.obstacle = obstacle
         self.special = special
 
-  
     def draw(self, screen, cell_size):
         """Draws the tile on the screen."""
         rect = pygame.Rect(self.x * cell_size, self.y * cell_size, cell_size, cell_size)
         pygame.draw.rect(screen, self.color, rect)
-
 
 class Swamp(Tile):
     """Water tile (swamp)."""
     def __init__(self, x, y):
         super().__init__(x, y, color=(0, 51, 102), visibility=2, speed=2, obstacle=False, special="swamp")
 
-
 class Forest(Tile):
     """Forest tile (dark forest)."""
     def __init__(self, x, y):
         super().__init__(x, y, color=(0, 50, 0), visibility=3, speed=3, obstacle=False, special="dark forest")
-
 
 class Mountain(Tile):
     """Mountain tile (dark)."""
     def __init__(self, x, y):
         super().__init__(x, y, color=(50, 50, 50), visibility=1, speed=1, obstacle=False, special="mountain")
 
-
 class Obstacle(Tile):
     """Unpassable obstacle tile."""
     def __init__(self, x, y):
         super().__init__(x, y, color=(30, 30, 30), visibility=0, speed=0, obstacle=True, special="unpassable rock")
 
-
 class Plain(Tile):
     """Plain tile (flat and open land)."""
     def __init__(self, x, y):
         super().__init__(x, y, color=(140, 180, 120), visibility=4, speed=4, obstacle=False, special="plain")
-
 
 class Environment:
     """
@@ -126,33 +119,3 @@ class Environment:
         for row in self.grid:
             for tile in row:
                 tile.draw(screen, cell_size)
-
-
-def main():
-    pygame.init()
-    screen_width, screen_height = WIDTH, HEIGHT
-    screen = pygame.display.set_mode((screen_width, screen_height))
-    pygame.display.set_caption("Environment Generation Example")
-
-    cell_size = CELL_SIZE  # Use cell size defined in the unit file
-    environment = Environment()
-    environment.generate_environment(environment_type="plain")
-
-    clock = pygame.time.Clock()
-    running = True
-    while running:
-        screen.fill((0, 0, 0))
-        environment.draw(screen, cell_size)
-        pygame.display.flip()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        clock.tick(60)
-
-    pygame.quit()
-
-
-if __name__ == "__main__":
-    main()
