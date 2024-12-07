@@ -52,7 +52,7 @@ class Human(Unit):
         super().__init__(x, y, health=100, attack_power=15, speed=3, environment="plain")
         self.unit_type = "Human"
         self.load_image("images/human.png")  # Load image for the Human unit
-
+ 
     def environment_advantage(self, tile):
         if isinstance(tile, Plain):
             self.speed += 1  # Bonus de vitesse sur les plaines

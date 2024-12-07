@@ -25,6 +25,7 @@ class Tile:
         self.obstacle = obstacle
         self.special = special
 
+
     def draw(self, screen, cell_size):
         """Draws the tile on the screen."""
         rect = pygame.Rect(self.x * cell_size, self.y * cell_size, cell_size, cell_size)
