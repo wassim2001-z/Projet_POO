@@ -53,7 +53,7 @@ class Game:
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         exit()
-    
+     
                     if event.type == pygame.KEYDOWN:
                         dx, dy = 0, 0
                         if event.key == pygame.K_LEFT:

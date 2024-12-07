@@ -15,7 +15,7 @@ class Tile:
     obstacle : bool Indicates if the tile is an obstacle.
     special : str Special attribute for unique characteristics of the tile.
     """
-
+ 
     def __init__(self, x, y, color=(255, 255, 255), visibility=1, speed=1, obstacle=False, special=""):
         self.x = x
         self.y = y

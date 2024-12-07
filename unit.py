@@ -56,7 +56,7 @@ class Human(Unit):
     def environment_advantage(self, tile):
         if isinstance(tile, Plain):
             self.speed += 1  # Bonus de vitesse sur les plaines
-
+ 
     def special_ability(self):
         pass  # La capacité spéciale sera définie plus tard
 
