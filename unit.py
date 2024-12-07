@@ -60,7 +60,7 @@ class Human(Unit):
     def special_ability(self):
         pass  # La capacité spéciale sera définie plus tard
 
- 
+  
 class Elf(Unit):
     """Elf unit."""
     def __init__(self, x, y):
