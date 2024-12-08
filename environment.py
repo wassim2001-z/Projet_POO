@@ -1,6 +1,5 @@
 import random
 import pygame
-
 # Classe Tile
 class Tile:
     """
@@ -25,9 +24,14 @@ class Tile:
         self.obstacle = obstacle
         self.special = special
 
-    def draw(self, screen, cell_size):
-        """Draws the tile on the screen."""
-        rect = pygame.Rect(self.x * cell_size, self.y * cell_size, cell_size, cell_size)
+    def draw(self, screen, cell_size, offset_x, offset_y):
+        """Draws the tile on the screen, adjusted for camera offset."""
+        rect = pygame.Rect(
+            (self.x - offset_x) * cell_size,
+            (self.y - offset_y) * cell_size,
+            cell_size,
+            cell_size
+        )
         pygame.draw.rect(screen, self.color, rect)
 
 class Swamp(Tile):
@@ -114,8 +118,9 @@ class Environment:
                 tile.y = y
                 self.grid[y][x] = tile
 
-    def draw(self, screen, cell_size):
-        """Draws the environment on the screen."""
-        for row in self.grid:
-            for tile in row:
-                tile.draw(screen, cell_size)
+    def draw_with_camera(self, screen, cell_size, camera_x, camera_y, view_width, view_height):
+        """Draws the environment based on the camera's current position."""
+        for y in range(camera_y, min(camera_y + view_height, self.height)):
+            for x in range(camera_x, min(camera_x + view_width, self.width)):
+                tile = self.grid[y][x]
+                tile.draw(screen, cell_size, camera_x, camera_y)
