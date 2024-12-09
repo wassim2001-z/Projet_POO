@@ -1,5 +1,6 @@
 import pygame
 from environment import Environment
+from unit import Elf
 
 # Constantes
 GRID_WIDTH = 96
@@ -22,43 +23,36 @@ class Game:
         self.environment = Environment(GRID_WIDTH, GRID_HEIGHT)
         self.environment.generate_environment()
 
-        # Camera setup
-        self.camera_x = 0
-        self.camera_y = 0
+        # Ajouter les unités
+        self.player_unit = Elf(GRID_WIDTH // 2, GRID_HEIGHT // 2)
 
-        # Player position
-        self.player_x = GRID_WIDTH // 2
-        self.player_y = GRID_HEIGHT // 2
+        # Initialiser la caméra
+        self.camera_x = self.player_unit.x - VIEW_WIDTH // 2
+        self.camera_y = self.player_unit.y - VIEW_HEIGHT // 2
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP] and self.player_y > 0:
-            self.player_y -= 1
-        if keys[pygame.K_DOWN] and self.player_y < GRID_HEIGHT - 1:
-            self.player_y += 1
-        if keys[pygame.K_LEFT] and self.player_x > 0:
-            self.player_x -= 1
-        if keys[pygame.K_RIGHT] and self.player_x < GRID_WIDTH - 1:
-            self.player_x += 1
+        if keys[pygame.K_UP] and self.player_unit.y > 0:
+            self.player_unit.y -= 1
+        if keys[pygame.K_DOWN] and self.player_unit.y < GRID_HEIGHT - 1:
+            self.player_unit.y += 1
+        if keys[pygame.K_LEFT] and self.player_unit.x > 0:
+            self.player_unit.x -= 1
+        if keys[pygame.K_RIGHT] and self.player_unit.x < GRID_WIDTH - 1:
+            self.player_unit.x += 1
 
-        # Update camera position to follow the player
-        self.camera_x = max(0, min(self.player_x - VIEW_WIDTH // 2, GRID_WIDTH - VIEW_WIDTH))
-        self.camera_y = max(0, min(self.player_y - VIEW_HEIGHT // 2, GRID_HEIGHT - VIEW_HEIGHT))
+        self.camera_x = self.player_unit.x - VIEW_WIDTH // 2
+        self.camera_y = self.player_unit.y - VIEW_HEIGHT // 2
+        self.camera_x = max(0, min(self.camera_x, GRID_WIDTH - VIEW_WIDTH))
+        self.camera_y = max(0, min(self.camera_y, GRID_HEIGHT - VIEW_HEIGHT))
 
     def draw(self):
         self.screen.fill((0, 0, 0))
-
-        # Draw the environment with the camera
         self.environment.draw_with_camera(self.screen, CELL_SIZE, self.camera_x, self.camera_y, VIEW_WIDTH, VIEW_HEIGHT)
 
-        # Draw the player
-        player_rect = pygame.Rect(
-            (self.player_x - self.camera_x) * CELL_SIZE,
-            (self.player_y - self.camera_y) * CELL_SIZE,
-            CELL_SIZE,
-            CELL_SIZE
-        )
-        pygame.draw.rect(self.screen, (255, 0, 0), player_rect)
+        player_screen_x = (self.player_unit.x - self.camera_x) * CELL_SIZE
+        player_screen_y = (self.player_unit.y - self.camera_y) * CELL_SIZE
+        self.player_unit.draw(self.screen, player_screen_x, player_screen_y)
 
         pygame.display.flip()
 

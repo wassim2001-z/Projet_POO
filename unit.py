@@ -1,16 +1,4 @@
 import pygame
-import random
-from environment import *
-
-# Constantes
-GRID_SIZE = 16
-CELL_SIZE = 60
-WIDTH = 2 * GRID_SIZE * CELL_SIZE
-HEIGHT = GRID_SIZE * CELL_SIZE
-FPS = 30
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
 
 class Unit:
     """Base class for all units."""
@@ -33,20 +21,26 @@ class Unit:
         except pygame.error as e:
             print(f"Error loading image {image_path}: {e}")
 
-    def draw(self, screen):
+    def draw(self, screen, screen_x=None, screen_y=None):
         """Draws the unit on the screen with a health bar and skill points."""
         if self.image:
-            screen.blit(self.image, (self.x * CELL_SIZE, self.y * CELL_SIZE))
+            scaled_image = pygame.transform.scale(self.image, (60, 60))
+            if screen_x is not None and screen_y is not None:
+                screen.blit(scaled_image, (screen_x, screen_y))
+            else:
+                screen.blit(scaled_image, (self.x * 60, self.y * 60))
+
         # Draw health bar
-        health_bar_width = CELL_SIZE
+        health_bar_width = 60
         health_ratio = self.health / 100  # Assuming max health is 100 for simplicity
         health_bar_height = 5
-        health_bar_color = (255, 0, 0)  # Red for health
-        pygame.draw.rect(screen, health_bar_color, (self.x * CELL_SIZE, self.y * CELL_SIZE - health_bar_height, health_bar_width * health_ratio, health_bar_height))
+        pygame.draw.rect(screen, (255, 0, 0), (screen_x or self.x * 60, (screen_y or self.y * 60) - health_bar_height, health_bar_width, health_bar_height))
+        pygame.draw.rect(screen, (0, 255, 0), (screen_x or self.x * 60, (screen_y or self.y * 60) - health_bar_height, int(health_bar_width * health_ratio), health_bar_height))
+
         # Draw skill points
         font = pygame.font.Font(None, 20)
-        skill_text = font.render(str(self.skill_points), True, WHITE)
-        screen.blit(skill_text, (self.x * CELL_SIZE + 5, self.y * CELL_SIZE + CELL_SIZE - 20))
+        skill_text = font.render(str(self.skill_points), True, (255, 255, 255))
+        screen.blit(skill_text, ((screen_x or self.x * 60) + 5, (screen_y or self.y * 60) + 40))
 
     def has_enough_skill_points(self, cost):
         """Checks if the unit has enough skill points to use a skill."""
@@ -74,7 +68,6 @@ class Human(Unit):
         cost = 3
         if self.has_enough_skill_points(cost):
             self.skill_points -= cost
-            # Apply damage reduction effect for 2 turns (placeholder)
 
     def rally_cry(self, allies):
         cost = 4
@@ -101,7 +94,6 @@ class Elf(Unit):
         cost = 3
         if self.has_enough_skill_points(cost):
             self.skill_points -= cost
-            # Reveal area logic here (placeholder)
 
     def rapid_shot(self, targets):
         cost = 3
@@ -115,7 +107,7 @@ class Dwarf(Unit):
     def __init__(self, x, y):
         super().__init__(x, y, health=120, attack_power=10, speed=2, environment="mountain")
         self.unit_type = "Dwarf"
-        self.load_image(Dwarf.png)
+        self.load_image("Dwarf.png")
 
     def mountain_fury(self):
         cost = 3
@@ -128,8 +120,7 @@ class Dwarf(Unit):
         if self.has_enough_skill_points(cost):
             self.skill_points -= cost
             for target in targets:
-                target.health -= self.attack_power  # Standard attack damage
-                # Apply stun effect (placeholder)
+                target.health -= self.attack_power
 
     def stone_resilience(self):
         cost = 3
@@ -175,7 +166,6 @@ class Goblin(Unit):
         cost = 4
         if self.has_enough_skill_points(cost):
             self.skill_points -= cost
-            # Apply invisibility effect (placeholder)
 
     def explosive_trap(self, target):
         cost = 3
@@ -187,14 +177,14 @@ class Goblin(Unit):
         cost = 2
         if self.has_enough_skill_points(cost):
             self.skill_points -= cost
-            target.health -= self.attack_power * 1.5  # Ignore defense
+            target.health -= self.attack_power * 1.5
 
 class Troll(Unit):
     """Troll unit."""
     def __init__(self, x, y):
         super().__init__(x, y, health=200, attack_power=25, speed=2, environment="mixed")
         self.unit_type = "Troll"
-        self.load_image("images/troll.png")
+        self.load_image("Troll.png")
 
     def rapid_regeneration(self):
         cost = 4
@@ -214,4 +204,4 @@ class Troll(Unit):
         if self.has_enough_skill_points(cost):
             self.skill_points -= cost
             for target in targets:
-                target.attack_power -= target.attack_power * 0.2  # Reduce attack power
+                target.attack_power -= target.attack_power * 0.2
