@@ -51,6 +51,18 @@ class Unit:
         if self.skill_points < self.max_skill_points:
             self.skill_points += 0.5
 
+    def get_accessible_tiles(self, environment):
+        """Calculates the tiles the unit can move to based on its speed and the environment."""
+        accessible_tiles = []
+        for dy in range(-self.speed, self.speed + 1):
+            for dx in range(-self.speed, self.speed + 1):
+                new_x, new_y = self.x + dx, self.y + dy
+                if environment.is_within_bounds(new_x, new_y):
+                    tile = environment.grid[new_y][new_x]
+                    if tile and not tile.obstacle and tile.speed <= self.speed:
+                        accessible_tiles.append((new_x, new_y))
+        return accessible_tiles
+
 class Human(Unit):
     """Human unit."""
     def __init__(self, x, y):

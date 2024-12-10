@@ -80,6 +80,17 @@ class Environment:
         self.height = height
         self.grid = [[None for _ in range(self.width)] for _ in range(self.height)]
 
+    def is_within_bounds(self, x, y):
+        """Check if the given (x, y) coordinates are within the grid boundaries."""
+        return 0 <= x < self.width and 0 <= y < self.height
+
+    def is_obstacle(self, x, y):
+        """Check if a given tile is an obstacle."""
+        if self.is_within_bounds(x, y):
+            tile = self.grid[y][x]
+            return tile.obstacle if tile else False
+        return True
+
     def generate_environment(self):
         elf_zone = (0, 0, self.width // 2, self.height // 2)
         dwarf_zone = (0, self.height // 2, self.width // 2, self.height)
