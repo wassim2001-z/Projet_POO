@@ -13,7 +13,14 @@ class Unit:
         self.unit_type = "Generic Unit"
         self.skill_points = 2
         self.max_skill_points = 11
+        self.weapon = None
 
+    def pick_up_weapon(self, weapon):
+        """拾取武器并增加攻击力。"""
+        if weapon and weapon.x == self.x and weapon.y == self.y:
+            self.attack_power += weapon.attack_boost
+            self.weapon = weapon  # 标记该单位已拾取武器
+            
     def load_image(self, image_path):
         """Loads an image for the unit using pygame."""
         try:
@@ -217,3 +224,13 @@ class Troll(Unit):
             self.skill_points -= cost
             for target in targets:
                 target.attack_power -= target.attack_power * 0.2
+class Weapon:
+    def __init__(self, x, y, attack_boost=5):
+        self.x = x
+        self.y = y
+        self.attack_boost = attack_boost
+        self.image = pygame.image.load("weapon.png").convert_alpha()  # 假设武器图像为 `weapon.png`
+
+    def draw(self, screen, screen_x, screen_y):
+        scaled_image = pygame.transform.scale(self.image, (60, 60))
+        screen.blit(scaled_image, (screen_x, screen_y))

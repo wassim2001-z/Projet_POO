@@ -1,6 +1,7 @@
 import pygame
 from environment import Environment
 from unit import Elf
+from unit import Weapon
 
 # Constantes
 GRID_WIDTH = 96
@@ -26,10 +27,16 @@ class Game:
         # Ajouter les unités
         self.player_unit = Elf(GRID_WIDTH // 2, GRID_HEIGHT // 2)
 
+        # 添加武器
+        self.weapon = Weapon(GRID_WIDTH // 2 + 1, GRID_HEIGHT // 2)  # 放在角色附近
+ 
         # Initialiser la sélection et la caméra
         self.camera_x = self.player_unit.x - VIEW_WIDTH // 2
         self.camera_y = self.player_unit.y - VIEW_HEIGHT // 2
         self.selected_tile = (self.player_unit.x, self.player_unit.y)
+
+        self.notification_text = None  # 当前提示文本
+        self.notification_timer = 0  # 提示文本的计时器
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -54,7 +61,14 @@ class Game:
         if keys[pygame.K_RETURN]:
             if self.selected_tile in accessible_tiles:
                 self.player_unit.x, self.player_unit.y = self.selected_tile
-                # Réinitialiser la sélection sur l'unité
+                # 检查拾取武器
+                if self.weapon and self.weapon.x == self.player_unit.x and self.weapon.y == self.player_unit.y:
+                    self.player_unit.pick_up_weapon(self.weapon)
+                    self.weapon = None  # 从地图上移除武器
+
+                    self.notification_text = "Attack +5!"
+                    self.notification_timer = 60  # 假设 60 帧为 2 秒（FPS=30）
+
                 self.selected_tile = (self.player_unit.x, self.player_unit.y)
 
         # Mise à jour de la caméra
@@ -79,10 +93,28 @@ class Game:
         # Dessiner les cases accessibles
         self.draw_accessible_tiles()
 
+        # 绘制武器
+        if self.weapon is not None:  # 添加检查
+            weapon_screen_x = (self.weapon.x - self.camera_x) * CELL_SIZE
+            weapon_screen_y = (self.weapon.y - self.camera_y) * CELL_SIZE
+            self.weapon.draw(self.screen, weapon_screen_x, weapon_screen_y)
+
         # Dessiner l'unité
         player_screen_x = (self.player_unit.x - self.camera_x) * CELL_SIZE
         player_screen_y = (self.player_unit.y - self.camera_y) * CELL_SIZE
         self.player_unit.draw(self.screen, player_screen_x, player_screen_y)
+
+        # 绘制提示文本
+        if self.notification_text and self.notification_timer > 0:
+            font = pygame.font.Font(None, 36)
+            text_surface = font.render(self.notification_text, True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))  # 屏幕顶部居中
+            self.screen.blit(text_surface, text_rect)
+            self.notification_timer -= 1  # 计时器递减
+            
+        if self.notification_timer == 0:
+            self.notification_text = None  # 清除文本
+
 
         pygame.display.flip()
 
