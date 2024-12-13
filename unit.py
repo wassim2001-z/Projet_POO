@@ -234,3 +234,15 @@ class Weapon:
     def draw(self, screen, screen_x, screen_y):
         scaled_image = pygame.transform.scale(self.image, (60, 60))
         screen.blit(scaled_image, (screen_x, screen_y))
+        
+class HealthPotion:
+    def __init__(self, x, y, health_boost=20):
+        self.x = x
+        self.y = y
+        self.health_boost = health_boost
+        self.image = pygame.image.load("health_potion.png").convert_alpha()  # 假设药水图像为 `health_potion.png`
+
+    def draw(self, screen, screen_x, screen_y):
+        """绘制药水到屏幕上"""
+        scaled_image = pygame.transform.scale(self.image, (60, 60))
+        screen.blit(scaled_image, (screen_x, screen_y))
