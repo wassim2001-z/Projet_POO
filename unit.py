@@ -42,26 +42,47 @@ class Unit:
         skill_text = font.render(str(self.skill_points), True, (255, 255, 255))
         screen.blit(skill_text, ((screen_x or self.x * 60) + 5, (screen_y or self.y * 60) + 40))
 
+    def attack(self, target):
+        """Basic attack on another unit."""
+        if target:
+            print(f"{self.unit_type} attacks {target.unit_type} for {self.attack_power} damage!")
+            target.health -= self.attack_power
+            if target.health <= 0:
+                print(f"{target.unit_type} has been defeated!")
+
     def has_enough_skill_points(self, cost):
         """Checks if the unit has enough skill points to use a skill."""
         return self.skill_points >= cost
 
+    def use_skill(self, skill_number):
+        """Uses a skill based on the skill number."""
+        if skill_number == 1:
+            return self.skill_one()
+        elif skill_number == 2:
+            return self.skill_two()
+        elif skill_number == 3:
+            return self.skill_three()
+        return False
+
+    def skill_one(self):
+        """Override this method for specific skill 1."""
+        print(f"{self.unit_type} does not have Skill 1.")
+        return False
+
+    def skill_two(self):
+        """Override this method for specific skill 2."""
+        print(f"{self.unit_type} does not have Skill 2.")
+        return False
+
+    def skill_three(self):
+        """Override this method for specific skill 3."""
+        print(f"{self.unit_type} does not have Skill 3.")
+        return False
+
     def update_skill_points(self):
         """Increases skill points at the end of a turn."""
         if self.skill_points < self.max_skill_points:
-            self.skill_points += 0.5
-
-    def get_accessible_tiles(self, environment):
-        """Calculates the tiles the unit can move to based on its speed and the environment."""
-        accessible_tiles = []
-        for dy in range(-self.speed, self.speed + 1):
-            for dx in range(-self.speed, self.speed + 1):
-                new_x, new_y = self.x + dx, self.y + dy
-                if environment.is_within_bounds(new_x, new_y):
-                    tile = environment.grid[new_y][new_x]
-                    if tile and not tile.obstacle and tile.speed <= self.speed:
-                        accessible_tiles.append((new_x, new_y))
-        return accessible_tiles
+            self.skill_points += 1
 
 class Human(Unit):
     """Human unit."""
@@ -70,23 +91,29 @@ class Human(Unit):
         self.unit_type = "Human"
         self.load_image("Human.png")
 
-    def charge(self, target):
+    def skill_one(self):
         cost = 3
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Charge!")
             self.skill_points -= cost
-            target.health -= self.attack_power * 1.5  # 150% attack damage
+            return True
+        return False
 
-    def shield_protection(self):
+    def skill_two(self):
         cost = 3
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Shield Protection!")
             self.skill_points -= cost
+            return True
+        return False
 
-    def rally_cry(self, allies):
+    def skill_three(self):
         cost = 4
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Rally Cry!")
             self.skill_points -= cost
-            for ally in allies:
-                ally.attack_power += ally.attack_power * 0.2  # Increase attack by 20%
+            return True
+        return False
 
 class Elf(Unit):
     """Elf unit."""
@@ -95,50 +122,29 @@ class Elf(Unit):
         self.unit_type = "Elf"
         self.load_image("Elf.png")
 
-    def enchanted_arrow(self, targets):
+    def skill_one(self):
         cost = 2
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Enchanted Arrow!")
             self.skill_points -= cost
-            for target in targets:
-                target.health -= self.attack_power * 1.2  # 120% attack damage
+            return True
+        return False
 
-    def eagle_vision(self):
+    def skill_two(self):
         cost = 3
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Eagle Vision!")
             self.skill_points -= cost
+            return True
+        return False
 
-    def rapid_shot(self, targets):
+    def skill_three(self):
         cost = 3
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Rapid Shot!")
             self.skill_points -= cost
-            for target in targets[:2]:  # Up to two targets
-                target.health -= self.attack_power
-
-class Dwarf(Unit):
-    """Dwarf unit."""
-    def __init__(self, x, y):
-        super().__init__(x, y, health=120, attack_power=10, speed=2, environment="mountain")
-        self.unit_type = "Dwarf"
-        self.load_image("Dwarf.png")
-
-    def mountain_fury(self):
-        cost = 3
-        if self.has_enough_skill_points(cost):
-            self.skill_points -= cost
-            self.health += 10  # Temporary bonus health
-
-    def hammer_slam(self, targets):
-        cost = 4
-        if self.has_enough_skill_points(cost):
-            self.skill_points -= cost
-            for target in targets:
-                target.health -= self.attack_power
-
-    def stone_resilience(self):
-        cost = 3
-        if self.has_enough_skill_points(cost):
-            self.skill_points -= cost
-            self.health += 25  # Recover health
+            return True
+        return False
 
 class Orc(Unit):
     """Orc unit."""
@@ -147,25 +153,62 @@ class Orc(Unit):
         self.unit_type = "Orc"
         self.load_image("Orc.png")
 
-    def war_cry(self, targets):
+    def skill_one(self):
         cost = 3
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses War Cry!")
             self.skill_points -= cost
-            for target in targets:
-                target.attack_power -= target.attack_power * 0.25  # Reduce attack power by 25%
+            return True
+        return False
 
-    def berserk(self):
+    def skill_two(self):
         cost = 4
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Berserk!")
             self.skill_points -= cost
-            self.attack_power += self.attack_power * 0.5  # Increase attack by 50%
-            self.health -= self.health * 0.2  # Reduce defense
+            return True
+        return False
 
-    def savage_leap(self, target):
+    def skill_three(self):
         cost = 3
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Savage Leap!")
             self.skill_points -= cost
-            target.health -= self.attack_power  # Apply damage
+            return True
+        return False
+
+class Dwarf(Unit):
+    """Dwarf unit."""
+    def __init__(self, x, y):
+        super().__init__(x, y, health=120, attack_power=10, speed=2, environment="mountain")
+        self.unit_type = "Dwarf"
+        self.load_image("Dwarf.png")
+
+    def skill_one(self):
+        cost = 3
+        if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Mountain Fury!")
+            self.skill_points -= cost
+            self.health += 10  # Bonus temporary health
+            return True
+        return False
+
+    def skill_two(self):
+        cost = 4
+        if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Hammer Slam!")
+            self.skill_points -= cost
+            return True
+        return False
+
+    def skill_three(self):
+        cost = 3
+        if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Stone Resilience!")
+            self.skill_points -= cost
+            self.health += 25
+            return True
+        return False
 
 class Goblin(Unit):
     """Goblin unit."""
@@ -174,22 +217,29 @@ class Goblin(Unit):
         self.unit_type = "Goblin"
         self.load_image("Goblin.png")
 
-    def vanish(self):
+    def skill_one(self):
         cost = 4
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Vanish!")
             self.skill_points -= cost
+            return True
+        return False
 
-    def explosive_trap(self, target):
+    def skill_two(self):
         cost = 3
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Explosive Trap!")
             self.skill_points -= cost
-            target.health -= 15  # Fixed damage
+            return True
+        return False
 
-    def backstab(self, target):
+    def skill_three(self):
         cost = 2
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Backstab!")
             self.skill_points -= cost
-            target.health -= self.attack_power * 1.5
+            return True
+        return False
 
 class Troll(Unit):
     """Troll unit."""
@@ -198,22 +248,27 @@ class Troll(Unit):
         self.unit_type = "Troll"
         self.load_image("Troll.png")
 
-    def rapid_regeneration(self):
+    def skill_one(self):
         cost = 4
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Rapid Regeneration!")
             self.skill_points -= cost
             self.health += self.health * 0.3  # Recover 30% health
+            return True
+        return False
 
-    def crushing_blow(self, targets):
+    def skill_two(self):
         cost = 5
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Crushing Blow!")
             self.skill_points -= cost
-            for target in targets:
-                target.health -= self.attack_power  # Heavy damage
+            return True
+        return False
 
-    def terrifying_roar(self, targets):
+    def skill_three(self):
         cost = 3
         if self.has_enough_skill_points(cost):
+            print(f"{self.unit_type} uses Terrifying Roar!")
             self.skill_points -= cost
-            for target in targets:
-                target.attack_power -= target.attack_power * 0.2
+            return True
+        return False

@@ -7,7 +7,7 @@ def load_textures():
         "swamp": pygame.image.load("2.png"),
         "forest": pygame.image.load("1.png"),
         "mountain": pygame.image.load("3.png"),
-        "obstacle": pygame.image.load("2.png"),
+        "obstacle": pygame.image.load("ob1.png"),
         "plain": pygame.image.load("1.png"),
         "river": pygame.image.load("7.png"),
         "dead_forest": pygame.image.load("6.png"),
@@ -44,7 +44,7 @@ class Swamp(Tile):
 
 class Forest(Tile):
     def __init__(self, x, y):
-        super().__init__(x, y, "forest", visibility=3, speed=3, obstacle=False, special="dark forest")
+        super().__init__(x, y, "forest", visibility=3, speed=5, obstacle=False, special="dark forest")
 
 class Mountain(Tile):
     def __init__(self, x, y):
@@ -79,6 +79,7 @@ class Environment:
         self.width = width
         self.height = height
         self.grid = [[None for _ in range(self.width)] for _ in range(self.height)]
+        self.zones = {}
 
     def is_within_bounds(self, x, y):
         """Check if the given (x, y) coordinates are within the grid boundaries."""
@@ -91,18 +92,30 @@ class Environment:
             return tile.obstacle if tile else False
         return True
 
-    def generate_environment(self):
-        elf_zone = (0, 0, self.width // 2, self.height // 2)
-        dwarf_zone = (0, self.height // 2, self.width // 2, self.height)
-        human_zone = (self.width // 4, self.height // 4, 3 * self.width // 4, 3 * self.height // 4)
-        orc_zone = (self.width // 2, 0, self.width, self.height // 2)
-        darkness_zone = (self.width // 2, self.height // 2, self.width, self.height)
+    def get_zone(self, x, y):
+        """Retourne la zone correspondant à une position."""
+        if not self.is_within_bounds(x, y):
+            return None
 
-        self._fill_zone(elf_zone, forest_pct=0.7, plain_pct=0.1, swamp_pct=0.1, river_pct=0.1)
-        self._fill_zone(dwarf_zone, forest_pct=0.1, plain_pct=0.2, mountain_pct=0.6, river_pct=0.1)
-        self._fill_zone(human_zone, forest_pct=0.3, plain_pct=0.5, swamp_pct=0.1, river_pct=0.1)
-        self._fill_zone(orc_zone, dead_forest_pct=0.3, swamp_pct=0.3, volcanic_pct=0.2, mountain_pct=0.2)
-        self._fill_zone(darkness_zone, dead_forest_pct=0.4, ruins_pct=0.3, swamp_pct=0.2, mountain_pct=0.1)
+        for zone_name, (x_start, y_start, x_end, y_end) in self.zones.items():
+            if x_start <= x < x_end and y_start <= y < y_end:
+                return zone_name
+        return None
+
+    def generate_environment(self):
+        self.zones = {
+            "elf": (0, 0, self.width // 2, self.height // 2),
+            "dwarf": (0, self.height // 2, self.width // 2, self.height),
+            "human": (self.width // 4, self.height // 4, 3 * self.width // 4, 3 * self.height // 4),
+            "orc": (self.width // 2, 0, self.width, self.height // 2),
+            "troll": (self.width // 2, self.height // 2, self.width, self.height)
+        }
+
+        self._fill_zone(self.zones["elf"], forest_pct=0.7, plain_pct=0.1, swamp_pct=0.1, river_pct=0.1)
+        self._fill_zone(self.zones["dwarf"], forest_pct=0.1, plain_pct=0.2, mountain_pct=0.6, river_pct=0.1)
+        self._fill_zone(self.zones["human"], forest_pct=0.3, plain_pct=0.5, swamp_pct=0.1, river_pct=0.1)
+        self._fill_zone(self.zones["orc"], dead_forest_pct=0.3, swamp_pct=0.3, volcanic_pct=0.2, mountain_pct=0.2)
+        self._fill_zone(self.zones["troll"], dead_forest_pct=0.4, ruins_pct=0.3, swamp_pct=0.2, mountain_pct=0.1)
 
     def _fill_zone(self, zone, forest_pct=0, plain_pct=0, swamp_pct=0, mountain_pct=0, river_pct=0, volcanic_pct=0, dead_forest_pct=0, ruins_pct=0):
         x_start, y_start, x_end, y_end = zone
