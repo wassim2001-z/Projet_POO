@@ -4,7 +4,7 @@ from environment import Environment
 from unit import Elf
 from unit import Weapon
 from unit import HealthPotion
-
+from smoke import Smoke
 
 # Constantes
 GRID_WIDTH = 96
@@ -46,6 +46,7 @@ class Game:
         self.notification_timer = 0  # 提示文本的计时器
         self.stats_panel_timer = 0  # 数值面板计时器（以帧计时）
         self.stats_panel_timer = FPS * 3  # 游戏开始时显示面板 3 秒
+        self.smoke_effect = None  # 当前烟雾效果
 
     def generate_weapons(self, num_weapons):
         """随机生成指定数量的武器并放置在地图上。"""
@@ -151,6 +152,10 @@ class Game:
 
                 self.selected_tile = (self.player_unit.x, self.player_unit.y)
 
+        # 触发烟雾技能
+        if keys[pygame.K_SPACE] and not self.smoke_effect:  # 如果没有烟雾效果，且按下空格键
+            self.smoke_effect = Smoke(self.player_unit.x, self.player_unit.y, duration=FPS * 10)  # 持续10秒
+
         # Mise à jour de la caméra
         self.camera_x = self.player_unit.x - VIEW_WIDTH // 2
         self.camera_y = self.player_unit.y - VIEW_HEIGHT // 2
@@ -166,12 +171,26 @@ class Game:
             color = (0, 0, 255, 100) if (tile_x, tile_y) == self.selected_tile else (0, 255, 0, 100)
             pygame.draw.rect(self.screen, color, (screen_x, screen_y, CELL_SIZE, CELL_SIZE), 2)
 
+    def is_in_smoke(self, x, y):
+        """检查给定坐标是否在烟雾范围内"""
+        if self.smoke_effect:
+            smoke_start_x = self.smoke_effect.x - self.smoke_effect.size // 2
+            smoke_start_y = self.smoke_effect.y - self.smoke_effect.size // 2
+            smoke_end_x = smoke_start_x + self.smoke_effect.size
+            smoke_end_y = smoke_start_y + self.smoke_effect.size
+            return smoke_start_x <= x < smoke_end_x and smoke_start_y <= y < smoke_end_y
+        return False
+    
     def draw(self):
         self.screen.fill((0, 0, 0))
         self.environment.draw_with_camera(self.screen, CELL_SIZE, self.camera_x, self.camera_y, VIEW_WIDTH, VIEW_HEIGHT)
 
         # Dessiner les cases accessibles
         self.draw_accessible_tiles()
+
+        # 绘制烟雾
+        if self.smoke_effect:
+            self.smoke_effect.draw(self.screen, self.camera_x, self.camera_y, CELL_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT)
 
         # 绘制所有武器
         for weapon in self.weapons:
@@ -188,7 +207,9 @@ class Game:
         # Dessiner l'unité
         player_screen_x = (self.player_unit.x - self.camera_x) * CELL_SIZE
         player_screen_y = (self.player_unit.y - self.camera_y) * CELL_SIZE
-        self.player_unit.draw(self.screen, player_screen_x, player_screen_y)
+        # 检查烟雾效果是否覆盖角色
+        if not self.is_in_smoke(self.player_unit.x, self.player_unit.y):
+            self.player_unit.draw(self.screen, player_screen_x, player_screen_y)
 
         # 绘制提示文本
         if self.notification_text and self.notification_timer > 0:
@@ -216,6 +237,11 @@ class Game:
                 elif event.type == pygame.KEYDOWN:  
                     if event.key == pygame.K_ESCAPE: 
                         running = False  
+            # 更新烟雾持续时间
+            if self.smoke_effect:
+                self.smoke_effect.duration -= 1
+                if self.smoke_effect.duration <= 0:
+                    self.smoke_effect = None  # 移除烟雾效果
 
             self.handle_input()
             self.draw()
