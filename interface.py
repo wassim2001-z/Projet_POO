@@ -16,7 +16,7 @@ class Interface:
              "Dwarf": pygame.image.load("Dwarf.png"),
              "Goblin": pygame.image.load("Goblin.png"),
              "Troll": pygame.image.load("Orc.png"),
-         }
+         } 
 
     def add_message(self, message_type, unit_type=None, skill_name=None, value=None):
         """Adds a new message to the interface based on the action type."""

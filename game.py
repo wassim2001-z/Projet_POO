@@ -36,7 +36,7 @@ class Game:
         self.current_unit_index = 0
         self.turn_counter = 0  # Compteur pour la régénération des points de compétence
         self.game_over = False
-
+ 
         # Interface setup
         self.interface = Interface(width=SIDEBAR_WIDTH)
 

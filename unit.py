@@ -153,7 +153,7 @@ class Dwarf(Unit):
         super().__init__(x, y, health=120, attack_power=10, speed=2, environment="mountain")
         self.unit_type = "Dwarf"
         self.load_image("Dwarf.png")
-
+ 
     def skill_one(self):
         cost = 3
         if self.has_enough_skill_points(cost):

@@ -149,7 +149,7 @@ class Environment:
                     tile.x = x
                     tile.y = y
                     self.grid[y][x] = tile
-
+ 
     def draw_with_camera(self, screen, cell_size, camera_x, camera_y, view_width, view_height):
         for y in range(camera_y, min(camera_y + view_height, self.height)):
             for x in range(camera_x, min(camera_x + view_width, self.width)):
