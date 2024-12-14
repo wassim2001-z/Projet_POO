@@ -44,7 +44,7 @@ class Game:
         # Objets et effets
         self.weapons = []
         self.health_potions = []
-        self.smoke_effect = None  # Effet de fumée
+        self.smokes = []  # 存储烟雾区域
         self.venoms = []  # 初始化毒液区域列表
 
         # Générer objets
@@ -103,6 +103,14 @@ class Game:
                 self.venoms.append(venom)
                 current_unit.venom_used = True  # 标记为已使用
                 print(f"{current_unit.unit_type} used Venom Skill!")
+
+        # Human 烟雾技能
+        if isinstance(current_unit, Human) and keys[pygame.K_SPACE]:
+            if not current_unit.smoke_used:  # 检查是否未使用过烟雾技能
+                smoke = Smoke(current_unit.x, current_unit.y, size=7, duration=float('inf'))  # 设置为无限持续时间
+                self.smokes.append(smoke)  # 添加到烟雾列表
+                current_unit.smoke_used = True  # 标记为已使用
+                print(f"{current_unit.unit_type} used Smoke Skill! This skill can no longer be used.")
 
         # Navigation de la sélection
         new_x, new_y = self.selected_tile
@@ -236,8 +244,9 @@ class Game:
         for unit in self.units:
             unit.draw(self.screen, (unit.x - self.camera_x) * CELL_SIZE, (unit.y - self.camera_y) * CELL_SIZE)
 
-        if self.smoke_effect:
-            self.smoke_effect.draw(self.screen, self.camera_x, self.camera_y, CELL_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT)
+        # 绘制烟雾区域
+        for smoke in self.smokes:
+            smoke.draw(self.screen, self.camera_x, self.camera_y, CELL_SIZE)
 
         # Dessiner l'interface
         self.interface.draw(self.screen, self.units)
@@ -252,10 +261,10 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
 
-            if self.smoke_effect:
-                self.smoke_effect.duration -= 1
-                if self.smoke_effect.duration <= 0:
-                    self.smoke_effect = None
+            # 更新烟雾区域的持续时间
+            self.smokes = [smoke for smoke in self.smokes if smoke.duration > 0]
+            for smoke in self.smokes:
+                smoke.duration -= 1
 
             self.handle_input()
             self.draw()
