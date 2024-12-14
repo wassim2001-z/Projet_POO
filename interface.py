@@ -1,4 +1,5 @@
 import pygame
+from unit import Elf
 
 class Interface:
     """Class to manage the user interface, including messages and unit statistics."""
