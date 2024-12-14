@@ -97,6 +97,7 @@ class Human(Unit):
         super().__init__(x, y, health=100, attack_power=15, speed=3, environment="plain")
         self.unit_type = "Human"
         self.load_image("Human.png")
+        self.smoke_used = False  # 初始化为未使用烟雾技能
 
     def skill_one(self):
         cost = 3
