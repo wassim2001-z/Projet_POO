@@ -7,7 +7,7 @@ def load_textures():
         "swamp": pygame.image.load("2.png"),
         "forest": pygame.image.load("1.png"),
         "mountain": pygame.image.load("3.png"),
-        "obstacle": pygame.image.load("ob1.png"),
+        "obstacle": pygame.image.load("ob1.png"),  # Texture spécifique pour obstacle
         "plain": pygame.image.load("1.png"),
         "river": pygame.image.load("7.png"),
         "dead_forest": pygame.image.load("6.png"),

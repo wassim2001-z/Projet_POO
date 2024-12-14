@@ -13,6 +13,13 @@ class Unit:
         self.unit_type = "Generic Unit"
         self.skill_points = 2
         self.max_skill_points = 11
+        self.weapon = None
+
+    def pick_up_weapon(self, weapon):
+        """Pick up a weapon and increase attack power."""
+        if weapon and weapon.x == self.x and weapon.y == self.y:
+            self.attack_power += weapon.attack_boost
+            self.weapon = weapon
 
     def load_image(self, image_path):
         """Loads an image for the unit using pygame."""
@@ -20,6 +27,14 @@ class Unit:
             self.image = pygame.image.load(image_path).convert_alpha()
         except pygame.error as e:
             print(f"Error loading image {image_path}: {e}")
+
+    def attack(self, target):
+        """Default attack logic for units."""
+        if target and target.health > 0:
+            target.health -= self.attack_power
+            print(f"{self.unit_type} attacked {target.unit_type} for {self.attack_power} damage!")
+            if target.health <= 0:
+                print(f"{target.unit_type} has been defeated!")
 
     def draw(self, screen, screen_x=None, screen_y=None):
         """Draws the unit on the screen with a health bar and skill points."""
@@ -42,14 +57,6 @@ class Unit:
         skill_text = font.render(str(self.skill_points), True, (255, 255, 255))
         screen.blit(skill_text, ((screen_x or self.x * 60) + 5, (screen_y or self.y * 60) + 40))
 
-    def attack(self, target):
-        """Basic attack on another unit."""
-        if target:
-            print(f"{self.unit_type} attacks {target.unit_type} for {self.attack_power} damage!")
-            target.health -= self.attack_power
-            if target.health <= 0:
-                print(f"{target.unit_type} has been defeated!")
-
     def has_enough_skill_points(self, cost):
         """Checks if the unit has enough skill points to use a skill."""
         return self.skill_points >= cost
@@ -62,27 +69,27 @@ class Unit:
             return self.skill_two()
         elif skill_number == 3:
             return self.skill_three()
-        return False
+        return None
 
     def skill_one(self):
         """Override this method for specific skill 1."""
         print(f"{self.unit_type} does not have Skill 1.")
-        return False
+        return None
 
     def skill_two(self):
         """Override this method for specific skill 2."""
         print(f"{self.unit_type} does not have Skill 2.")
-        return False
+        return None
 
     def skill_three(self):
         """Override this method for specific skill 3."""
         print(f"{self.unit_type} does not have Skill 3.")
-        return False
+        return None
 
     def update_skill_points(self):
         """Increases skill points at the end of a turn."""
         if self.skill_points < self.max_skill_points:
-            self.skill_points += 1
+            self.skill_points += 0.5
 
 class Human(Unit):
     """Human unit."""
@@ -94,26 +101,23 @@ class Human(Unit):
     def skill_one(self):
         cost = 3
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Charge!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Charge"
+        return None
 
     def skill_two(self):
         cost = 3
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Shield Protection!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Shield Protection"
+        return None
 
     def skill_three(self):
         cost = 4
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Rally Cry!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Rally Cry"
+        return None
 
 class Elf(Unit):
     """Elf unit."""
@@ -125,57 +129,23 @@ class Elf(Unit):
     def skill_one(self):
         cost = 2
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Enchanted Arrow!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Enchanted Arrow"
+        return None
 
     def skill_two(self):
         cost = 3
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Eagle Vision!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Eagle Vision"
+        return None
 
     def skill_three(self):
         cost = 3
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Rapid Shot!")
             self.skill_points -= cost
-            return True
-        return False
-
-class Orc(Unit):
-    """Orc unit."""
-    def __init__(self, x, y):
-        super().__init__(x, y, health=90, attack_power=18, speed=3, environment="swamp")
-        self.unit_type = "Orc"
-        self.load_image("Orc.png")
-
-    def skill_one(self):
-        cost = 3
-        if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses War Cry!")
-            self.skill_points -= cost
-            return True
-        return False
-
-    def skill_two(self):
-        cost = 4
-        if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Berserk!")
-            self.skill_points -= cost
-            return True
-        return False
-
-    def skill_three(self):
-        cost = 3
-        if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Savage Leap!")
-            self.skill_points -= cost
-            return True
-        return False
+            return "Rapid Shot"
+        return None
 
 class Dwarf(Unit):
     """Dwarf unit."""
@@ -187,28 +157,55 @@ class Dwarf(Unit):
     def skill_one(self):
         cost = 3
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Mountain Fury!")
             self.skill_points -= cost
-            self.health += 10  # Bonus temporary health
-            return True
-        return False
+            self.health += 10  # Temporary bonus health
+            return "Mountain Fury"
+        return None
 
     def skill_two(self):
         cost = 4
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Hammer Slam!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Hammer Slam"
+        return None
 
     def skill_three(self):
         cost = 3
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Stone Resilience!")
             self.skill_points -= cost
-            self.health += 25
-            return True
-        return False
+            self.health += 25  # Recover health
+            return "Stone Resilience"
+        return None
+
+class Orc(Unit):
+    """Orc unit."""
+    def __init__(self, x, y):
+        super().__init__(x, y, health=90, attack_power=18, speed=3, environment="swamp")
+        self.unit_type = "Orc"
+        self.load_image("Orc.png")
+
+    def skill_one(self):
+        cost = 3
+        if self.has_enough_skill_points(cost):
+            self.skill_points -= cost
+            return "War Cry"
+        return None
+
+    def skill_two(self):
+        cost = 4
+        if self.has_enough_skill_points(cost):
+            self.skill_points -= cost
+            self.attack_power += self.attack_power * 0.5  # Increase attack by 50%
+            self.health -= self.health * 0.2  # Reduce defense
+            return "Berserk"
+        return None
+
+    def skill_three(self):
+        cost = 3
+        if self.has_enough_skill_points(cost):
+            self.skill_points -= cost
+            return "Savage Leap"
+        return None
 
 class Goblin(Unit):
     """Goblin unit."""
@@ -220,26 +217,23 @@ class Goblin(Unit):
     def skill_one(self):
         cost = 4
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Vanish!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Vanish"
+        return None
 
     def skill_two(self):
         cost = 3
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Explosive Trap!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Explosive Trap"
+        return None
 
     def skill_three(self):
         cost = 2
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Backstab!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Backstab"
+        return None
 
 class Troll(Unit):
     """Troll unit."""
@@ -251,24 +245,43 @@ class Troll(Unit):
     def skill_one(self):
         cost = 4
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Rapid Regeneration!")
             self.skill_points -= cost
             self.health += self.health * 0.3  # Recover 30% health
-            return True
-        return False
+            return "Rapid Regeneration"
+        return None
 
     def skill_two(self):
         cost = 5
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Crushing Blow!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Crushing Blow"
+        return None
 
     def skill_three(self):
         cost = 3
         if self.has_enough_skill_points(cost):
-            print(f"{self.unit_type} uses Terrifying Roar!")
             self.skill_points -= cost
-            return True
-        return False
+            return "Terrifying Roar"
+        return None
+
+class Weapon:
+    def __init__(self, x, y, attack_boost=5):
+        self.x = x
+        self.y = y
+        self.attack_boost = attack_boost
+        self.image = pygame.image.load("weapon.png").convert_alpha()
+
+    def draw(self, screen, screen_x, screen_y):
+        scaled_image = pygame.transform.scale(self.image, (60, 60))
+        screen.blit(scaled_image, (screen_x, screen_y))
+
+class HealthPotion:
+    def __init__(self, x, y, health_boost=20):
+        self.x = x
+        self.y = y
+        self.health_boost = health_boost
+        self.image = pygame.image.load("health_potion.png").convert_alpha()
+
+    def draw(self, screen, screen_x, screen_y):
+        scaled_image = pygame.transform.scale(self.image, (60, 60))
+        screen.blit(scaled_image, (screen_x, screen_y))
